@@ -13,7 +13,7 @@
 #include "Timer.hpp"
 
 using first_type = char;
-using second_type = int;
+using second_type = char;
 using third_type = char;
 using fourth_type = int;
 
@@ -68,9 +68,9 @@ template <typename Container> Container test_data(const size_t N) {
     std::mt19937 rng;
     rng.seed(std::random_device()());
     std::uniform_int_distribution<std::mt19937::result_type> charDist(
-        1, std::numeric_limits<int>::max());
+        1, std::numeric_limits<char>::max());
     std::uniform_int_distribution<std::mt19937::result_type> intDist(
-        1, std::numeric_limits<int>::max());
+        1, std::numeric_limits<char>::max());
     using value_type = typename Container::value_type;
     for (size_t idx = 0; idx < N; ++idx) {
         data[idx] = value_type(intDist(rng), charDist(rng), intDist(rng), charDist(rng));
@@ -93,29 +93,35 @@ template <typename Container> void test_sort(Container &data, const std::string 
     std::sort(data.begin(), data.end());
 }
 
-template <typename Container> size_t test_sum_struct(Container &data, const std::string &msg) {
+template <typename Container>
+size_t test_sum_struct(const Container &data, const std::string &msg) {
     utils::ElapsedTime<utils::MILLISECOND> t(msg);
     using value_type = typename Container::value_type;
+    const size_t N = data.size();
     size_t sum = 0;
-    std::for_each(data.begin(), data.end(), [&sum](const value_type &item) {
-        sum += item.first + item.second + item.third + item.fourth;
-    });
+    for (size_t idx = 0; idx < N; ++idx) {
+        sum += data[idx].first + data[idx].second + data[idx].third + data[idx].fourth;
+    }
     return sum;
 }
 
-template <typename Container> size_t test_sum_tuple(Container &data, const std::string &msg) {
+template <typename Container>
+size_t test_sum_tuple(const Container &data, const std::string &msg) {
     utils::ElapsedTime<utils::MILLISECOND> t(msg);
     using value_type = typename Container::value_type;
+    const size_t N = data.size();
     size_t sum = 0;
-    std::for_each(data.begin(), data.end(), [&sum](const value_type &item) {
-        sum += std::get<0>(item) + std::get<1>(item) + std::get<2>(item) + std::get<3>(item);
-    });
+    for (size_t idx = 0; idx < N; ++idx) {
+        sum += std::get<0>(data[idx]) + std::get<1>(data[idx]) + std::get<2>(data[idx]) +
+               std::get<3>(data[idx]);
+    }
+
     return sum;
 }
 
-template <typename Container> void test_tbb_sort(Container &data, const std::string &msg) {
-    utils::ElapsedTime<utils::MILLISECOND> t(msg);
-    tbb::parallel_sort(data.begin(), data.end());
-}
+// template <typename Container> void test_tbb_sort(Container &data, const std::string &msg) {
+//     utils::ElapsedTime<utils::MILLISECOND> t(msg);
+//     tbb::parallel_sort(data.begin(), data.end());
+// }
 
 #endif
