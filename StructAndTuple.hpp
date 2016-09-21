@@ -20,8 +20,9 @@ using fourth_type = int;
 struct Data {
     Data() : first(), second(), third(), fourth() {}
 
-    template <typename T1, typename T2, typename T3, typename T4>
-    Data(T1 &&v1, T2 &&v2, T3 &&v3, T4 &&v4) : first(v1), second(v2), third(v3), fourth(v4) {}
+    Data(const first_type &v1, const second_type &v2, const third_type &v3,
+         const fourth_type &v4)
+        : first(v1), second(v2), third(v3), fourth(v4) {}
 
     Data(const Data &rhs) {
         first = rhs.first;
@@ -32,8 +33,7 @@ struct Data {
 
     template <typename T>
     Data(T &&rhs)
-        : first(std::move(rhs.first)), second(std::move(rhs.second)),
-          third(std::move(rhs.third)), fourth(std::move(rhs.fourth)) {}
+        : first(rhs.first), second(rhs.second), third(rhs.third), fourth(rhs.fourth) {}
 
     Data &operator=(const Data &rhs) {
         if (this == &rhs)

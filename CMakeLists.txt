@@ -11,6 +11,7 @@ set (CMAKE_BUILD_TYPE Release)
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef)
 
 # Uncomment below lines if using clang
+# set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm-cilk/bin/clang++")
 set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra -pedantic -O4 -Wno-deprecated-register -Wno-keyword-macro -Wno-unused-local-typedef")
 
@@ -79,6 +80,13 @@ if (Boost_FOUND)
   endforeach (src_file)
 
   set(UNITTEST_SRC_FILES tparallel_for)
+  foreach (src_file ${UNITTEST_SRC_FILES})
+    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+    TARGET_LINK_LIBRARIES(${src_file} ${BOOST_LIBRARIES}  ${LIB_GTEST} ${LIB_GTEST_MAIN} -ltbb -lpthread)
+    ADD_TEST(${src_file} ./${src_file})
+  endforeach (src_file)
+
+  set(UNITTEST_SRC_FILES tcilk_basic)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} ${BOOST_LIBRARIES}  ${LIB_GTEST} ${LIB_GTEST_MAIN} -ltbb -lpthread)
