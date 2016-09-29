@@ -70,8 +70,9 @@ set(LIB_LZ4 "${PROJECTS_FOLDER}/3p/lz4/lib/liblz4.a")
 set(LIB_BZ2 "${PROJECTS_FOLDER}/3p/bzip2/lib/libbz2.a")
 set(LIB_SNAPPY "${PROJECTS_FOLDER}/3p/snappy/lib/libsnappy.a")
 set(LIB_JEMALLOC "${PROJECTS_FOLDER}/3p/jemalloc/lib/libjemalloc.a")
-
-set(LIB_TBB "${PROJECTS_FOLDER}/3p/tbb/lib/intel64/gcc4.4/libtbb.so")
+set(LIB_TBB "${PROJECTS_FOLDER}/3p/tbb/lib/libtbb.so")
+set(LIB_TBB_MALLOC "${PROJECTS_FOLDER}/3p/tbb/lib/libtbb.so")
+set(LIB_CELERO "${PROJECTS_FOLDER}/3p/Celero/bin/libcelero.so")
 
 # This option make sure that we use the local boost version. Note that if the 
 # system boost is installed then CMake might use that boost version.
@@ -105,6 +106,7 @@ include_directories ("${PROJECTS_FOLDER}/3p/jemalloc/include")
 include_directories ("${PROJECTS_FOLDER}/3p/cereal/include")
 include_directories ("${PROJECTS_FOLDER}/3p/sparsehash/include/")
 include_directories ("${PROJECTS_FOLDER}/3p/tbb/include/")
+include_directories ("${PROJECTS_FOLDER}/3p/Celero/include/")
 
 # Use POCO static library
 include_directories("${PROJECTS_FOLDER}/3p/poco/include")
@@ -112,10 +114,10 @@ set(LIB_POCO_FOUNDATION "${PROJECTS_FOLDER}/3p/poco/lib/libPocoFoundation.a")
 
 if (Boost_FOUND)
   include_directories(${BOOST_INCLUDE_DIRS})
-  set(UNITTEST_SRC_FILES tSmartPtr tStringSearch tParamPack tTuplePerfTests tStructPerfTests tTuplevsStruct tMoveConstructor tFile)
+  set(UNITTEST_SRC_FILES tSmartPtr tStringSearch tParamPack tTuplePerfTests tStructPerfTests tTuplevsStruct tMoveConstructor tFile serializationPerf)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${BOOST_LIBRARIES}  ${LIB_GTEST} ${LIB_GTEST_MAIN} -lpthread)
+    TARGET_LINK_LIBRARIES(${src_file} ${BOOST_LIBRARIES}  ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_CELERO} -lpthread)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
 
