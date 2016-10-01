@@ -20,6 +20,13 @@
 // https://github.com/DigitalInBlue/Celero
 #include "celero/Celero.h"
 
+template <typename T> const char* getFormattedString();
+template<> const char* getFormattedString<double>(){return "%g\n";}
+template<> const char* getFormattedString<float>(){return "%g\n";}
+template<> const char* getFormattedString<int>(){return "%d\n";}
+template<> const char* getFormattedString<size_t>(){return "%lu\n";}
+
+
 namespace {
     constexpr size_t LEN = 32;
 
@@ -35,10 +42,10 @@ namespace {
         char aLine[LEN];
         std::vector<char> buffer;
         buffer.reserve(std::distance(begin, end) * LEN);
-        std::for_each(begin, end, [&buffer, &aLine](const auto value) {
-            sprintf(aLine, "%lu\n", value);
-            const size_t len = strlen(aLine);
-            for (size_t idx = 0; idx < len; ++idx) {
+        const char* fmtStr = getFormattedString<typename std::iterator_traits<Iterator>::value_type>();
+        std::for_each(begin, end, [&buffer, &aLine, &fmtStr](const auto value) {
+            sprintf(aLine, fmtStr, value);
+            for (size_t idx = 0; aLine[idx] != 0; ++idx) {
                 buffer.push_back(aLine[idx]);
             }
         });
@@ -48,8 +55,9 @@ namespace {
     template <typename Iterator>
     auto toStringStream(Iterator begin, Iterator end, std::stringstream &buffer) {
         char aLine[LEN];
-        std::for_each(begin, end, [&buffer, &aLine](const auto value) {
-            sprintf(aLine, "%lu\n", value);
+        const char* fmtStr = getFormattedString<typename std::iterator_traits<Iterator>::value_type>();
+        std::for_each(begin, end, [&buffer, &aLine, &fmtStr](const auto value) {            
+            sprintf(aLine, fmtStr, value);
             buffer << aLine;
         });
     }
@@ -74,6 +82,9 @@ namespace {
     template <typename Iterator>
     void improved_original_approach(Iterator begin, Iterator end, const std::string &fileName) {
         std::ofstream fout(fileName);
+        const size_t len = std::distance(begin, end) * LEN;
+        std::vector<char> buffer(len);
+        fout.rdbuf()->pubsetbuf(buffer.data(), len);
         for (Iterator it = begin; it != end; ++it) {
             fout << *it << "\n";
         }
@@ -144,16 +155,16 @@ namespace {
     }
 }
 
-CELERO_MAIN
-
-
 // Performance test input data.
-constexpr int NumberOfSamples = 5;
-constexpr int NumberOfIterations = 2;
+constexpr int NumberOfSamples = 10;
+constexpr int NumberOfIterations = 4;
 constexpr int N = 3000000;
 const auto double_data = create_test_data<double>(N);
+const auto float_data = create_test_data<float>(N);
 const auto int_data = create_test_data<int>(N);
 const auto size_t_data = create_test_data<size_t>(N);
+
+CELERO_MAIN
 
 BASELINE(DoubleVector, original_approach, NumberOfSamples, NumberOfIterations) {
     const std::string fileName("origsol.txt");
@@ -195,44 +206,58 @@ BENCHMARK(DoubleVector, use_cereal, NumberOfSamples, NumberOfIterations) {
     use_cereal(double_data, fileName);
 }
 
-// Benchmark double vector
-BASELINE(DoubleVectorConversion, toStringStream, NumberOfSamples, NumberOfIterations) {
-    std::stringstream output;
-    toStringStream(double_data.cbegin(), double_data.cend(), output);
-}
+// // Benchmark double vector
+// BASELINE(DoubleVectorConversion, toStringStream, NumberOfSamples, NumberOfIterations) {
+//     std::stringstream output;
+//     toStringStream(double_data.cbegin(), double_data.cend(), output);
+// }
 
-BENCHMARK(DoubleVectorConversion, toMemoryWriter, NumberOfSamples, NumberOfIterations) {
-    celero::DoNotOptimizeAway(toMemoryWriter(double_data.cbegin(), double_data.cend()));
-}
+// BENCHMARK(DoubleVectorConversion, toMemoryWriter, NumberOfSamples, NumberOfIterations) {
+//     celero::DoNotOptimizeAway(toMemoryWriter(double_data.cbegin(), double_data.cend()));
+// }
 
-BENCHMARK(DoubleVectorConversion, toVectorOfChar, NumberOfSamples, NumberOfIterations) {
-    celero::DoNotOptimizeAway(toVectorOfChar(double_data.cbegin(), double_data.cend()));
-}
+// BENCHMARK(DoubleVectorConversion, toVectorOfChar, NumberOfSamples, NumberOfIterations) {
+//     celero::DoNotOptimizeAway(toVectorOfChar(double_data.cbegin(), double_data.cend()));
+// }
 
-// Benchmark int vector
-BASELINE(int_conversion, toStringStream, NumberOfSamples, NumberOfIterations) {
-    std::stringstream output;
-    toStringStream(int_data.cbegin(), int_data.cend(), output);
-}
+// // Benchmark float vector
+// BASELINE(FloatVectorConversion, toStringStream, NumberOfSamples, NumberOfIterations) {
+//     std::stringstream output;
+//     toStringStream(float_data.cbegin(), float_data.cend(), output);
+// }
 
-BENCHMARK(int_conversion, toMemoryWriter, NumberOfSamples, NumberOfIterations) {
-    celero::DoNotOptimizeAway(toMemoryWriter(int_data.cbegin(), int_data.cend()));
-}
+// BENCHMARK(FloatVectorConversion, toMemoryWriter, NumberOfSamples, NumberOfIterations) {
+//     celero::DoNotOptimizeAway(toMemoryWriter(float_data.cbegin(), float_data.cend()));
+// }
 
-BENCHMARK(int_conversion, toVectorOfChar, NumberOfSamples, NumberOfIterations) {
-    celero::DoNotOptimizeAway(toVectorOfChar(int_data.cbegin(), int_data.cend()));
-}
+// BENCHMARK(FloatVectorConversion, toVectorOfChar, NumberOfSamples, NumberOfIterations) {
+//     celero::DoNotOptimizeAway(toVectorOfChar(float_data.cbegin(), float_data.cend()));
+// }
 
-// Benchmark size_t vector
-BASELINE(size_t_conversion, toStringStream, NumberOfSamples, NumberOfIterations) {
-    std::stringstream output;
-    toStringStream(size_t_data.cbegin(), size_t_data.cend(), output);
-}
+// // Benchmark int vector
+// BASELINE(int_conversion, toStringStream, NumberOfSamples, NumberOfIterations) {
+//     std::stringstream output;
+//     toStringStream(int_data.cbegin(), int_data.cend(), output);
+// }
 
-BENCHMARK(size_t_conversion, toMemoryWriter, NumberOfSamples, NumberOfIterations) {
-    celero::DoNotOptimizeAway(toMemoryWriter(size_t_data.cbegin(), size_t_data.cend()));
-}
+// BENCHMARK(int_conversion, toMemoryWriter, NumberOfSamples, NumberOfIterations) {
+//     celero::DoNotOptimizeAway(toMemoryWriter(int_data.cbegin(), int_data.cend()));
+// }
 
-BENCHMARK(size_t_conversion, toVectorOfChar, NumberOfSamples, NumberOfIterations) {
-    celero::DoNotOptimizeAway(toVectorOfChar(size_t_data.cbegin(), size_t_data.cend()));
-}
+// BENCHMARK(int_conversion, toVectorOfChar, NumberOfSamples, NumberOfIterations) {
+//     celero::DoNotOptimizeAway(toVectorOfChar(int_data.cbegin(), int_data.cend()));
+// }
+
+// // Benchmark size_t vector
+// BASELINE(size_t_conversion, toStringStream, NumberOfSamples, NumberOfIterations) {
+//     std::stringstream output;
+//     toStringStream(size_t_data.cbegin(), size_t_data.cend(), output);
+// }
+
+// BENCHMARK(size_t_conversion, toMemoryWriter, NumberOfSamples, NumberOfIterations) {
+//     celero::DoNotOptimizeAway(toMemoryWriter(size_t_data.cbegin(), size_t_data.cend()));
+// }
+
+// BENCHMARK(size_t_conversion, toVectorOfChar, NumberOfSamples, NumberOfIterations) {
+//     celero::DoNotOptimizeAway(toVectorOfChar(size_t_data.cbegin(), size_t_data.cend()));
+// }

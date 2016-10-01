@@ -36,8 +36,7 @@ namespace {
         buffer.reserve(std::distance(begin, end) * LEN);
         std::for_each(begin, end, [&buffer, &aLine](const auto value) {
             sprintf(aLine, "%g\n", value);
-            const size_t len = strlen(aLine);
-            for (size_t idx = 0; idx < len; ++idx) {
+            for (size_t idx = 0; aLine[idx] != 0; ++idx) {
                 buffer.push_back(aLine[idx]);
             }
         });
