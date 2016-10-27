@@ -96,7 +96,6 @@ template <typename Container> void test_sort(Container &data, const std::string 
 template <typename Container>
 size_t test_sum_struct(const Container &data, const std::string &msg) {
     utils::ElapsedTime<utils::MILLISECOND> t(msg);
-    using value_type = typename Container::value_type;
     const size_t N = data.size();
     size_t sum = 0;
     for (size_t idx = 0; idx < N; ++idx) {
@@ -108,7 +107,6 @@ size_t test_sum_struct(const Container &data, const std::string &msg) {
 template <typename Container>
 size_t test_sum_tuple(const Container &data, const std::string &msg) {
     utils::ElapsedTime<utils::MILLISECOND> t(msg);
-    using value_type = typename Container::value_type;
     const size_t N = data.size();
     size_t sum = 0;
     for (size_t idx = 0; idx < N; ++idx) {
