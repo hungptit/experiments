@@ -30,9 +30,10 @@ add_cxx_compiler_flag(-std=c++14)
 add_cxx_compiler_flag(-Wall)
 add_cxx_compiler_flag(-Wextra)
 add_cxx_compiler_flag(-Wshadow)
-add_cxx_compiler_flag(-Werror RELEASE)
-add_cxx_compiler_flag(-Werror RELWITHDEBINFO)
-add_cxx_compiler_flag(-Werror MINSIZEREL)
+
+# add_cxx_compiler_flag(-Werror RELEASE)
+# add_cxx_compiler_flag(-Werror RELWITHDEBINFO)
+# add_cxx_compiler_flag(-Werror MINSIZEREL)
 
 add_cxx_compiler_flag(-pedantic)
 add_cxx_compiler_flag(-pedantic-errors)
@@ -53,7 +54,7 @@ endif()
 add_cxx_compiler_flag(-DFMT_HEADER_ONLY)
 add_cxx_compiler_flag(-DCEREAL_RAPIDJSON_HAS_CXX11_RVALUE_REFS)
 
-set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
+# set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
 
 ENABLE_TESTING()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

@@ -12,7 +12,7 @@ struct StructData {
     int Y;
     double Cost;
     std::string Label;
-
+   
     bool operator==(const StructData &rhs) {
         return std::tie(X,Y,Cost, Label) == std::tie(rhs.X, rhs.Y, rhs.Cost, rhs.Label);
     }
@@ -21,11 +21,6 @@ struct StructData {
         return std::tie(X,Y,Cost, Label) < std::tie(rhs.X, rhs.Y, rhs.Cost, rhs.Label);
     }
 };
-
-bool operator<(const StructData &first, const StructData &second) {
-    return std::tie(first.X, first.Y, first.Cost, first.Label) <
-           std::tie(second.X, second.Y, second.Cost, second.Label);
-}
 
 using TupleData = std::tuple<int, int, double, std::string>;
 
