@@ -17,10 +17,30 @@ struct StructData {
         return std::tie(X,Y,Cost, Label) == std::tie(rhs.X, rhs.Y, rhs.Cost, rhs.Label);
     }
 
+    void swap(StructData & other)
+    {
+        std::swap(X, other.X);
+        std::swap(Y, other.Y);
+        std::swap(Cost, other.Cost);
+        std::swap(Label, other.Label);
+    }  
+
+    // bool operator<(const StructData &rhs) {
+    //     return std::tie(X,Y,Cost, Label) < std::tie(rhs.X, rhs.Y, rhs.Cost, rhs.Label);
+    // }
+    
     bool operator<(const StructData &rhs) {
-        return std::tie(X,Y,Cost, Label) < std::tie(rhs.X, rhs.Y, rhs.Cost, rhs.Label);
+        return X < rhs.X || (X == rhs.X && (Y < rhs.Y || (Y == rhs.Y && (Cost < rhs.Cost || (Cost == rhs.Cost && Label < rhs.Label)))));
     }
 };
+
+
+
+
+void swap(StructData & v1, StructData & v2)
+{
+    v1.swap(v2);
+}
 
 using TupleData = std::tuple<int, int, double, std::string>;
 

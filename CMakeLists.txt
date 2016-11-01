@@ -54,7 +54,7 @@ endif()
 add_cxx_compiler_flag(-DFMT_HEADER_ONLY)
 add_cxx_compiler_flag(-DCEREAL_RAPIDJSON_HAS_CXX11_RVALUE_REFS)
 
-# set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
+set(CMAKE_CXX_COMPILER "${PROJECTS_FOLDER}3p/llvm/bin/clang++")
 
 ENABLE_TESTING()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -115,7 +115,7 @@ set(LIB_POCO_FOUNDATION "${PROJECTS_FOLDER}/3p/poco/lib/libPocoFoundation.a")
 
 if (Boost_FOUND)
   include_directories(${BOOST_INCLUDE_DIRS})
-  set(UNITTEST_SRC_FILES tBalancedBrackets tSmartPtr tStringSearch tParamPack tTuplePerfTests tStructPerfTests tTuplevsStruct tMoveConstructor tFile serializationPerf)
+  set(UNITTEST_SRC_FILES tBalancedBrackets tSmartPtr tStringSearch tParamPack tTuplePerfTests tStructPerfTests tTuplevsStruct tMoveConstructor tFile serializationPerf tConstructorStyle)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} ${BOOST_LIBRARIES}  ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_CELERO} -lpthread)
