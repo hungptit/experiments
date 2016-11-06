@@ -10,15 +10,7 @@
 using T = double;
 
 struct StructData {
-    int X;
-    int Y;
-    T Cost;
-    std::string Label;
-
-    bool operator==(const StructData &rhs) {
-        return std::tie(X, Y, Cost, Label) == std::tie(rhs.X, rhs.Y, rhs.Cost, rhs.Label);
-    }
-    
+  public:
     void swap(StructData &other) {
         std::swap(X, other.X);
         std::swap(Y, other.Y);
@@ -26,17 +18,40 @@ struct StructData {
         std::swap(Label, other.Label);
     }
 
-    bool operator<(const StructData &rhs) {
-        return std::tie(X, Y, Cost, Label) < std::tie(rhs.X, rhs.Y, rhs.Cost, rhs.Label);
-    }
+    void setX(const int val) {X = val;}
+    void setY(const int val) {Y = val;}
+    void setCost(const T val) {Cost = val;}
+    void setLabel(const std::string val) {Label = val;}
 
-    // bool operator<(const StructData &rhs) {
-    //     return X < rhs.X || (X == rhs.X && (Y < rhs.Y || (Y == rhs.Y && (Cost < rhs.Cost ||
-    //     (Cost == rhs.Cost && Label < rhs.Label)))));
-    // }
+    auto convertToTuple() const {return std::tie(X, Y, Cost, Label);}
+    
+    friend bool operator<(const StructData &first, const StructData &second);
+    friend bool operator==(const StructData &first, const StructData &second);
+    friend std::ostream &operator<<(std::ostream &os, const StructData &obj);
+
+  private:
+    int X;
+    int Y;
+    T Cost;
+    std::string Label;
 };
 
 void swap(StructData &v1, StructData &v2) { v1.swap(v2); }
+
+bool operator==(const StructData &first, const StructData &second) {
+    return std::tie(first.X, first.Y, first.Cost, first.Label) ==
+           std::tie(second.X, second.Y, second.Cost, second.Label);
+}
+
+bool operator<(const StructData &first, const StructData &second) {
+    return std::tie(first.X, first.Y, first.Cost, first.Label) <
+           std::tie(second.X, second.Y, second.Cost, second.Label);
+}
+
+// bool operator<(const StructData &rhs) {
+//     return X < rhs.X || (X == rhs.X && (Y < rhs.Y || (Y == rhs.Y && (Cost < rhs.Cost ||
+//     (Cost == rhs.Cost && Label < rhs.Label)))));
+// }
 
 using TupleData = std::tuple<int, int, T, std::string>;
 
@@ -46,10 +61,10 @@ std::vector<StructData> test_struct_data(const size_t N) {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis(0, N);
-        item.X = dis(gen);
-        item.Y = dis(gen);
-        item.Cost = item.X * item.Y;
-        item.Label = std::to_string(item.Cost);
+        item.setX(dis(gen));
+        item.setY(dis(gen));
+        item.setCost(dis(gen));
+        item.setLabel(std::to_string(dis(gen)));
         return item;
     });
     return data;
@@ -58,7 +73,7 @@ std::vector<StructData> test_struct_data(const size_t N) {
 std::vector<TupleData> test_tuple_data(const std::vector<StructData> &input) {
     std::vector<TupleData> data(input.size());
     std::transform(input.cbegin(), input.cend(), data.begin(),
-                   [](auto item) { return std::tie(item.X, item.Y, item.Cost, item.Label); });
+                   [](auto item) { return item.convertToTuple(); });
     return data;
 }
 
@@ -90,11 +105,13 @@ CELERO_MAIN
 BASELINE(Sort, struct, NumberOfSamples, NumberOfIterations) {
     std::vector<StructData> data(sdata.begin(), sdata.end());
     std::sort(data.begin(), data.end());
+    std::is_sorted(data.cbegin(), data.cend());
     // print(data);
 }
 
 BENCHMARK(Sort, tuple, NumberOfSamples, NumberOfIterations) {
     std::vector<TupleData> data(tdata.begin(), tdata.end());
     std::sort(data.begin(), data.end());
+    std::is_sorted(data.cbegin(), data.cend());
     // print(data);
 }
