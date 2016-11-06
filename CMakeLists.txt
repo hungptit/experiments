@@ -29,7 +29,7 @@ add_cxx_compiler_flag(-O4)
 add_cxx_compiler_flag(-std=c++14)
 add_cxx_compiler_flag(-Wall)
 add_cxx_compiler_flag(-Wextra)
-add_cxx_compiler_flag(-Wshadow)
+# add_cxx_compiler_flag(-Wshadow)
 
 # add_cxx_compiler_flag(-Werror RELEASE)
 # add_cxx_compiler_flag(-Werror RELWITHDEBINFO)
@@ -87,7 +87,7 @@ if (Boost_NO_SYSTEM_PATHS)
   set(BOOST_LIBRARY_DIRS "${BOOST_ROOT}/lib")
 endif (Boost_NO_SYSTEM_PATHS)
 
-message(${BOOST_ROOT})
+message("${BOOST_ROOT}")
 
 find_package(Boost 1.60 REQUIRED regex date_time system filesystem thread graph program_options iostreams)
 
@@ -115,10 +115,19 @@ set(LIB_POCO_FOUNDATION "${PROJECTS_FOLDER}/3p/poco/lib/libPocoFoundation.a")
 
 if (Boost_FOUND)
   include_directories(${BOOST_INCLUDE_DIRS})
-  set(UNITTEST_SRC_FILES tBalancedBrackets tSmartPtr tStringSearch tParamPack tTuplePerfTests tStructPerfTests tTuplevsStruct tMoveConstructor tFile serializationPerf)
+  set(UNITTEST_SRC_FILES tBalancedBrackets tSmartPtr tStringSearch tParamPack tTuplePerfTests tStructPerfTests  tMoveConstructor tFile)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
-    TARGET_LINK_LIBRARIES(${src_file} ${BOOST_LIBRARIES}  ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_CELERO} -lpthread)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES}  ${LIB_GTEST} ${LIB_GTEST_MAIN} ${LIB_CELERO} -lpthread)
+    ADD_TEST(${src_file} ./${src_file})
+  endforeach (src_file)
+  
+  message(${Boost_LIBRARIES})
+  
+  set(UNITTEST_SRC_FILES tTuplevsStruct serializationPerf tOptimizeString)
+  foreach (src_file ${UNITTEST_SRC_FILES})
+    ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
+    TARGET_LINK_LIBRARIES(${src_file} ${Boost_LIBRARIES} ${LIB_CELERO} -lpthread)
     ADD_TEST(${src_file} ./${src_file})
   endforeach (src_file)
 
