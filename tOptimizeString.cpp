@@ -1,4 +1,5 @@
 #include <string>
+#include <iostream>
 
 // https://github.com/DigitalInBlue/Celero
 #include "celero/Celero.h"
@@ -114,16 +115,27 @@ auto remove_ctrl_vector(const std::vector<char> &s) {
     return results;
 }
 
-auto remove_ctrl_vector_revise(const std::vector<char> &s, std::vector<char> &vresults) {
-    // vresults.clear();
-    auto idx = 0;
-    for (auto ch : s) {
-        if (ch >= 0x20) {
-            vresults[++idx] = ch;
+auto remove_ctrl_vector_revise(std::vector<char>::const_iterator ibegin, std::vector<char>::const_iterator iend, std::vector<char>::iterator obegin) {
+    auto oit = obegin;
+    for (auto it = ibegin; it != iend; ++it) {
+        if (*it >= 0x20) {
+          *(++oit) = *it;;
         }
     }
-    return idx;
+    return oit;
 }
+
+// template <typename InputIterator, typename OutputIterator>
+// auto remove_ctrl_vector_revise(InputIterator ibegin, InputIterator iend, OutputIterator obegin) {
+//     auto oit = obegin;
+//     for (auto it = ibegin; it != iend; ++it) {
+//         if (*it >= 0x20) {
+//           *(++oit) = *it;;
+//         }
+//     }
+//     return oit;
+// }
+
 
 auto remove_ctrl_cstyle(char *output, const char *input, const size_t N) {
     for (size_t idx = 0; idx < N; ++idx) {
@@ -184,7 +196,7 @@ BENCHMARK(remove_ctrl, vector, NumberOfSamples, NumberOfIterations) {
 }
 
 BENCHMARK(remove_ctrl, vector_revise, NumberOfSamples, NumberOfIterations) {
-  remove_ctrl_vector_revise(vdata, vresults);
+  remove_ctrl_vector_revise(vdata.cbegin(), vdata.cend(), vresults.begin());
 }
 
 BENCHMARK(remove_ctrl, cstyle, NumberOfSamples, NumberOfIterations) {
