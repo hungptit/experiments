@@ -12,6 +12,8 @@ How to optimize simple string function for performance.
 
 # Experimental design #
 
+Compiler: I use clang-4.0.0 compiler with -O4 flag to compile all examples. The test data is the content of a binary file (65992 bytes). Below is the code for preparing test data
+
     std::string read(const std::string &dataFile) {
         boost::iostreams::mapped_file mmap(dataFile, boost::iostreams::mapped_file::readonly);
         auto begin = mmap.const_data();
@@ -332,25 +334,43 @@ Performance results:
 
 # Final results #
 
-% ./tOptimizeString
+Obtained using clang-4.0.0
 
-    Celero
-    Timer resolution: 0.001000 us
     -----------------------------------------------------------------------------------------------------------------------------------------------
          Group      |   Experiment    |   Prob. Space   |     Samples     |   Iterations    |    Baseline     |  us/Iteration   | Iterations/sec  | 
     -----------------------------------------------------------------------------------------------------------------------------------------------
-    remove_ctrl     | basic           | Null            |              50 |              10 |         1.00000 |     22966.30000 |           43.54 | 
-    remove_ctrl     | cstyle          | Null            |              50 |              10 |         0.00334 |        76.60000 |        13054.83 | 
-    remove_ctrl     | mutating        | Null            |              50 |              10 |         0.00826 |       189.60000 |         5274.26 | 
-    remove_ctrl     | reserve         | Null            |              50 |              10 |         0.00823 |       188.90000 |         5293.81 | 
-    remove_ctrl     | ref_args        | Null            |              50 |              10 |         0.00720 |       165.40000 |         6045.95 | 
-    remove_ctrl     | ref_args_it     | Null            |              50 |              10 |         0.00641 |       147.30000 |         6788.87 | 
-    remove_ctrl     | ref_args_cit    | Null            |              50 |              10 |         0.00668 |       153.40000 |         6518.90 | 
-    remove_ctrl     | range_for       | Null            |              50 |              10 |         0.00588 |       135.00000 |         7407.41 | 
-    remove_ctrl     | for_each        | Null            |              50 |              10 |         0.00603 |       138.40000 |         7225.43 | 
-    remove_ctrl     | vector          | Null            |              50 |              10 |         0.00386 |        88.60000 |        11286.68 | 
-    remove_ctrl     | vector_revise   | Null            |              50 |              10 |         0.00375 |        86.10000 |        11614.40 | 
-    remove_ctrl     | vector_revise1  | Null            |              50 |              10 |         0.00383 |        87.90000 |        11376.56 |
+    remove_ctrl     | basic           | Null            |              50 |              10 |         1.00000 |     24140.20000 |           41.42 | 
+    remove_ctrl     | cstyle          | Null            |              50 |              10 |         0.00317 |        76.60000 |        13054.83 | 
+    remove_ctrl     | mutating        | Null            |              50 |              10 |         0.00785 |       189.40000 |         5279.83 | 
+    remove_ctrl     | reserve         | Null            |              50 |              10 |         0.00783 |       188.90000 |         5293.81 | 
+    remove_ctrl     | ref_args        | Null            |              50 |              10 |         0.00679 |       163.80000 |         6105.01 | 
+    remove_ctrl     | ref_args_it     | Null            |              50 |              10 |         0.00610 |       147.20000 |         6793.48 | 
+    remove_ctrl     | ref_args_cit    | Null            |              50 |              10 |         0.00616 |       148.70000 |         6724.95 | 
+    remove_ctrl     | range_for       | Null            |              50 |              10 |         0.00558 |       134.70000 |         7423.90 | 
+    remove_ctrl     | for_each        | Null            |              50 |              10 |         0.00574 |       138.60000 |         7215.01 | 
+    remove_ctrl     | vector          | Null            |              50 |              10 |         0.00367 |        88.60000 |        11286.68 | 
+    remove_ctrl     | vector_revise   | Null            |              50 |              10 |         0.00355 |        85.80000 |        11655.01 | 
+    remove_ctrl     | vector_revise1  | Null            |              50 |              10 |         0.00367 |        88.50000 |        11299.44 |
+
+
+Obtained using gcc-4.9.2
+
+    -----------------------------------------------------------------------------------------------------------------------------------------------
+         Group      |   Experiment    |   Prob. Space   |     Samples     |   Iterations    |    Baseline     |  us/Iteration   | Iterations/sec  | 
+    -----------------------------------------------------------------------------------------------------------------------------------------------
+    remove_ctrl     | basic           | Null            |              50 |              10 |         1.00000 |     22835.30000 |           43.79 | 
+    remove_ctrl     | cstyle          | Null            |              50 |              10 |         0.00416 |        95.10000 |        10515.25 | 
+    remove_ctrl     | mutating        | Null            |              50 |              10 |         0.00834 |       190.40000 |         5252.10 | 
+    remove_ctrl     | reserve         | Null            |              50 |              10 |         0.00718 |       164.00000 |         6097.56 | 
+    remove_ctrl     | ref_args        | Null            |              50 |              10 |         0.00598 |       136.50000 |         7326.01 | 
+    remove_ctrl     | ref_args_it     | Null            |              50 |              10 |         0.00588 |       134.30000 |         7446.02 | 
+    remove_ctrl     | ref_args_cit    | Null            |              50 |              10 |         0.00572 |       130.70000 |         7651.11 | 
+    remove_ctrl     | range_for       | Null            |              50 |              10 |         0.00531 |       121.20000 |         8250.83 | 
+    remove_ctrl     | for_each        | Null            |              50 |              10 |         0.00538 |       122.90000 |         8136.70 | 
+    remove_ctrl     | vector          | Null            |              50 |              10 |         0.00393 |        89.70000 |        11148.27 | 
+    remove_ctrl     | vector_revise   | Null            |              50 |              10 |         0.00411 |        93.80000 |        10660.98 | 
+    remove_ctrl     | vector_revise1  | Null            |              50 |              10 |         0.00394 |        89.90000 |        11123.47 |
+
 
 # Source code #
 
@@ -576,6 +596,6 @@ Performance results:
 
 # Conclusion #
 * A carefully designed C++ API can be at as fast a C style function.
-* C style function is the 2nd in term of performance, however, the C array is not mathematically correct. We should avoid of this coding style if possible.
-* std::vector<char> is significantly faster than std::string.
-* Minimize resource allocation when designing your shared API.
+* C style memory model is not mathematically correct. We should avoid of this coding style if possible.
+* std::vector<char> is significantly faster than std::string for storing a string buffer.
+* Minimize resource allocation when designing your shared API for performance.
