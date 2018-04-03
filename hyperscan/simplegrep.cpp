@@ -1,19 +1,59 @@
+#include "fmt/format.h"
 #include "hs/hs.h"
 #include "ioutils/ioutils.hpp"
-#include <errno.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <string>
 
-namespace {
-    int event_handler(unsigned int id, unsigned long long from, unsigned long long to,
-                      unsigned int flags, void *ctx) {
-        printf("Match for pattern \"%s\" at offset %llu\n", (char *)ctx, to);
-        return 0;
-    }
+namespace hyperscan {
+    class RegexMatcher {
+      public:
+        RegexMatcher(const std::string &patt) {
+            pattern = patt;
+            hs_compile_error_t *compile_err;
+            if (hs_compile(pattern.c_str(), HS_FLAG_DOTALL, HS_MODE_BLOCK, NULL, &database,
+                           &compile_err) != HS_SUCCESS) {
+                fmt::MemoryWriter writer;
+                writer << "ERROR: Unable to compile pattern \"" << pattern
+                       << "\": " << compile_err->message;
+                throw std::runtime_error(writer.str());
+            }
 
-} // namespace
+            if (hs_alloc_scratch(database, &scratch) != HS_SUCCESS) {
+                fmt::MemoryWriter writer;
+                throw std::runtime_error("Unable to allocate scratch space.");
+            }
+        }
+
+        bool operator()(const std::string &data) {
+            char *ptr = const_cast<char *>(pattern.c_str());
+            auto errcode =
+                hs_scan(database, data.data(), data.size(), 0, scratch, event_handler, ptr);
+            if (errcode == HS_SUCCESS) {
+				return false;
+            } else if (errcode == HS_SCAN_TERMINATED) {
+				return true;
+            } else {
+                throw std::runtime_error("Unable to scan input buffer");
+			}
+        }
+
+        ~RegexMatcher() {
+            hs_free_scratch(scratch);
+            hs_free_database(database);
+        }
+
+      private:
+        hs_database_t *database = NULL;
+        hs_scratch_t *scratch = NULL;
+        std::string pattern;
+        static unsigned int counter;
+        // An event handle callback.
+        static int event_handler(unsigned int id, unsigned long long from,
+                                 unsigned long long to, unsigned int flags, void *ctx) {
+            fmt::print("Match for pattern {0} at offset {1}\n", (char *)ctx, to);
+            return HS_SCAN_TERMINATED; // Found a match. Stop our search.
+        }
+    };
+} // namespace hyperscan
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
@@ -24,45 +64,9 @@ int main(int argc, char *argv[]) {
     char *pattern = argv[1];
     char *afile = argv[2];
 
-    /* First, we attempt to compile the pattern provided on the command line.
-     * We assume 'DOTALL' semantics, meaning that the '.' meta-character will
-     * match newline characters. The compiler will analyse the given pattern and
-     * either return a compiled Hyperscan database, or an error message
-     * explaining why the pattern didn't compile.
-     */
-    hs_database_t *database;
-    hs_compile_error_t *compile_err;
-    if (hs_compile(pattern, HS_FLAG_DOTALL, HS_MODE_BLOCK, NULL, &database, &compile_err) !=
-        HS_SUCCESS) {
-        fprintf(stderr, "ERROR: Unable to compile pattern \"%s\": %s\n", pattern,
-                compile_err->message);
-        hs_free_compile_error(compile_err);
-        return -1;
-    }
-
-    /* Next, we read the input data file into a buffer. */
+    /* Read the input data file into a buffer. */
     const std::string data = ioutils::read<std::string>(afile);
-    unsigned int length = data.size();
-
-    hs_scratch_t *scratch = NULL;
-    if (hs_alloc_scratch(database, &scratch) != HS_SUCCESS) {
-        fprintf(stderr, "ERROR: Unable to allocate scratch space. Exiting.\n");
-        hs_free_database(database);
-        return -1;
-    }
-
-    printf("Scanning %u bytes with Hyperscan\n", length);
-
-    if (hs_scan(database, data.data(), length, 0, scratch, event_handler, pattern) !=
-        HS_SUCCESS) {
-        fprintf(stderr, "ERROR: Unable to scan input buffer. Exiting.\n");
-        hs_free_scratch(scratch);
-        hs_free_database(database);
-        return -1;
-    }
-
-    // Clean up
-    hs_free_scratch(scratch);
-    hs_free_database(database);
+    hyperscan::RegexMatcher matcher(pattern);
+    fmt::print("Found: {}\n", matcher(data) ? "Yes" : "No");
     return 0;
 }
