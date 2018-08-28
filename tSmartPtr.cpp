@@ -1,11 +1,12 @@
 #include <memory>
-#include "gtest/gtest.h"
 #include <array>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <tuple>
 #include <vector>
+
+// TODO: Use Catch2
 
 TEST(SmartPtr, Positive) {
     std::unique_ptr<int> p(new int(1));

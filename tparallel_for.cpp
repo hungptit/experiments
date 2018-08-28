@@ -2,7 +2,7 @@
 #include <cmath>
 #include <vector>
 
-#include "utils/Timer.hpp"
+#include "utils/timer.hpp"
 
 template <typename Container> void print(Container &&data, const std::string &msg) {
     if (data.size() > 20) {
