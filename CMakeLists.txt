@@ -115,7 +115,7 @@ if (Boost_FOUND)
     TARGET_LINK_LIBRARIES(${src_file} -lreadline)
   endforeach (src_file)
 
-  set(UNITTEST_SRC_FILES test_ncurses)
+  set(UNITTEST_SRC_FILES test_ncurses test_ncurses2)
   foreach (src_file ${UNITTEST_SRC_FILES})
     ADD_EXECUTABLE(${src_file} ${src_file}.cpp)
     TARGET_LINK_LIBRARIES(${src_file} -lncurses)
